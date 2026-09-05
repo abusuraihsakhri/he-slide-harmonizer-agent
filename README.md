@@ -1,6 +1,6 @@
 # He Slide Harmonizer Agent
 
-> **Domain:** Digital Pathology & Quantitative Histopathology  
+> **Domain:** Digital Pathology & Quantitative Histopathology
 > **Reference Guidelines & Standards:** `College of American Pathologists (CAP) Synoptic Protocols & DICOM WSI`
 
 <div align="center">
@@ -18,7 +18,7 @@
 
 ## 📖 What It Does
 
-**He Slide Harmonizer Agent** is an advanced analytical and computational platform implementing Optical Stain Normalization & Scanner Harmonizer (Macenko/Vahadane).
+**He Slide Harmonizer Agent** is an advanced analytical and computational platform implementing Optical Stain Normalization & Scanner Harmonizer (Macenko/Vahadane). It provides multi-agent evaluation of digital pathology slide quality, stain consistency, and cross-scanner harmonization.
 
 ---
 
@@ -33,18 +33,54 @@
 - **`StainMatrixNormalizerAgent`**: Specialized Sub-Agent 2 for he-slide-harmonizer-agent
 - **`QualityConsistencyAgent`**: Specialized Sub-Agent 3 for he-slide-harmonizer-agent
 
+### 🏗️ Architecture Components
+
+- **`agents/`** — Enterprise agent framework with supervisor orchestrator, specialized workers, and FastAPI REST API
+- **`he_slide_harmonizer_agent/`** — Clinical agent package with coordinator, sub-agents, and domain engine
+- **`slide_harmonizer.py`** — Core harmonization module with CLI
+- **`enrichment.py`** — Enrichment feature suite with multiple evaluation engines
+- **`simulator.py`** — High-throughput batch simulation and stress testing
+
+---
+
+## 💻 Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/abusuraihsakhri/he-slide-harmonizer-agent.git
+cd he-slide-harmonizer-agent
+
+# Install dependencies
+pip install fastapi uvicorn pydantic pytest
+```
+
 ---
 
 ## 💻 CLI Quickstart & Usage
 
-### 1. Guided Interactive Mode
+### 1. Single Task Evaluation
 ```bash
-python cli.py
+python cli.py audit
 ```
 
-### 2. Direct Parameterized Evaluation
+### 2. Batch Processing
 ```bash
-python cli.py --task-id <value> --target <value> --primary <value> --secondary <value>
+python cli.py batch -i sample.csv -o results.csv
+```
+
+### 3. System Query Chat
+```bash
+python cli.py chat "What is the system status?"
+```
+
+### 4. Verify Audit Trail Integrity
+```bash
+python cli.py verify-audit
+```
+
+### 5. Launch REST API Server
+```bash
+python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
 ### Parameter Reference
@@ -73,7 +109,8 @@ python cli.py --task-id <value> --target <value> --primary <value> --secondary <
 ## 🛡️ Security & Enterprise Architecture
 
 * **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
+* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition. Per-session random key generation prevents audit forgery.
+* **Path Traversal Protection:** All batch file I/O is validated to remain within the working directory.
 * **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
 * **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
 * **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
@@ -91,7 +128,7 @@ pytest -v
 Execute high-throughput batch simulation benchmarks:
 
 ```bash
-python simulator.py --tasks 1000 --concurrency 8
+python simulator.py 1000
 ```
 
 ---
@@ -101,4 +138,39 @@ python simulator.py --tasks 1000 --concurrency 8
 ```bash
 docker build -t he-slide-harmonizer-agent .
 docker run -p 8000:8000 he-slide-harmonizer-agent
+```
+
+---
+
+## 📁 Project Structure
+
+```
+he-slide-harmonizer-agent/
+├── agents/                          # Enterprise agent framework
+│   ├── api.py                       # FastAPI REST server
+│   ├── base.py                      # Security, PHI guard, audit trail
+│   ├── llm_factory.py               # LLM provider factory
+│   ├── learning.py                  # Bayesian calibration engine
+│   ├── metrics.py                   # Prometheus metrics collector
+│   ├── models.py                    # Pydantic data models
+│   ├── streamer.py                  # WebSocket telemetry
+│   ├── supervisor.py                # Master orchestrator
+│   └── workers.py                   # Specialized domain workers
+├── he_slide_harmonizer_agent/       # Clinical agent package
+│   ├── agents.py                    # Coordinator & sub-agents
+│   ├── cli.py                       # Clinical CLI
+│   ├── consistency.py               # Cross-scanner consistency scoring
+│   ├── engine.py                    # Clinical domain engine
+│   ├── models.py                    # Clinical data models
+│   ├── reference.py                 # Stain reference target agent
+│   ├── server.py                    # Clinical FastAPI server
+│   └── validation.py                # Stain vector validation
+├── tests/                           # Test suites
+├── cli.py                           # Main CLI entry point
+├── enrichment.py                    # Enrichment feature suite
+├── simulator.py                     # Batch simulation
+├── slide_harmonizer.py              # Core harmonization module
+├── pyproject.toml                   # Project configuration
+├── Dockerfile                       # Container definition
+└── README.md                        # This file
 ```

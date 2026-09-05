@@ -11,9 +11,7 @@ from enrichment import (
     Enrichment1ScannerFingerprintingFromDicomWsiMetadataEngine,
     ImplementationEngine,
     Enrichment2StainIntensityHistogramEqualizationWithReferenceTargetEngine,
-    ImplementationEngine,
     Enrichment3MacenkovahadaneStainVectorValidationEngine,
-    ImplementationEngine,
     Enrichment4CrossscannerConsistencyScoringEngine,
     HeslideharmonizeragentEnrichmentSuite,
     enrichment_suite,
@@ -33,3 +31,18 @@ def test_enrichment_threshold_escalation():
     for k, v in res.items():
         assert v.status in ["WARNING", "CRITICAL_ALERT"]
         assert len(v.alerts) > 0
+
+def test_enrichment_suite_unique_results():
+    """Verify that the enrichment suite returns unique results for each engine (no duplicate keys)."""
+    suite = HeslideharmonizeragentEnrichmentSuite()
+    res = suite.execute_all(primary_val=0.5, secondary_val=0.2)
+    # Should have 6 unique engines, not 9 (which would indicate duplicate ImplementationEngine keys)
+    expected_keys = {
+        "OverviewEngine",
+        "Enrichment1ScannerFingerprintingFromDicomWsiMetadataEngine",
+        "ImplementationEngine",
+        "Enrichment2StainIntensityHistogramEqualizationWithReferenceTargetEngine",
+        "Enrichment3MacenkovahadaneStainVectorValidationEngine",
+        "Enrichment4CrossscannerConsistencyScoringEngine",
+    }
+    assert set(res.keys()) == expected_keys

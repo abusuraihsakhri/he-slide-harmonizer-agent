@@ -14,10 +14,12 @@ import datetime
 import json
 import sys
 import uuid
+from pathlib import Path
 from typing import Dict, Any, List, Optional
 
 
-class Severity(str):
+class Severity:
+    """Severity level constants for agent alerts."""
     INFO = "INFO"
     ADVISORY = "ADVISORY"
     WARNING = "WARNING"
@@ -173,6 +175,15 @@ class HarmonizationCoordinator:
 coordinator = HarmonizationCoordinator()
 
 
+def _validate_safe_path(filepath: str) -> Path:
+    """Validate that a file path is safe (no path traversal)."""
+    p = Path(filepath).resolve()
+    cwd = Path.cwd().resolve()
+    if not str(p).startswith(str(cwd)):
+        raise ValueError(f"Path traversal blocked: '{filepath}' must be within the working directory.")
+    return p
+
+
 def create_app():
     try:
         from fastapi import FastAPI
@@ -266,7 +277,9 @@ def main(argv=None):
         return 0
 
     if args.command == "batch":
-        with open(args.input, mode="r", encoding="utf-8-sig") as f:
+        in_path = _validate_safe_path(args.input)
+        out_path = _validate_safe_path(args.output)
+        with open(in_path, mode="r", encoding="utf-8-sig") as f:
             reader = csv.DictReader(f)
             fieldnames = list(reader.fieldnames or [])
             rows = list(reader)
@@ -282,7 +295,7 @@ def main(argv=None):
             row_dict["consensus_summary"] = dossier["consensus_summary"]
             out_rows.append(row_dict)
 
-        with open(args.output, mode="w", encoding="utf-8", newline="") as f:
+        with open(out_path, mode="w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=out_fields)
             writer.writeheader()
             writer.writerows(out_rows)

@@ -8,3 +8,11 @@ output.csv
 dist/
 build/
 *.egg-info/
+.venv/
+venv/
+.env
+*.egg
+.eggs/
+*.so
+*.dylib
+.DS_Store

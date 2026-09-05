@@ -12,7 +12,7 @@ from agents.base import PHIGuard, AuditLogger, SecurityException
 from agents.models import SystemTaskPayload, UrgencyLevel, SystemIntegrityStatus
 from agents.workers import InvariantQCWorker, SafetyEscalationWorker, ProtocolConformanceWorker
 from agents.supervisor import SystemSupervisor
-from cli import main
+from cli import main, _validate_safe_path
 
 
 def test_phi_guard_enforcement():
@@ -63,3 +63,30 @@ def test_supervisor_consensus_and_audit():
     assert main(["audit", "--task-id", "CLI-TEST-01"]) == 0
     assert main(["chat", "Explain", "specifications"]) == 0
     assert main(["verify-audit"]) == 0
+
+
+def test_path_traversal_protection():
+    """Verify that batch file paths are restricted to working directory."""
+    # Normal path within working directory should work
+    safe = _validate_safe_path("sample.csv")
+    assert safe is not None
+
+    # Path traversal attempt should be blocked
+    with pytest.raises(SecurityException):
+        _validate_safe_path("../../../etc/passwd")
+
+    with pytest.raises(SecurityException):
+        _validate_safe_path("C:/Windows/System32/config/sam")
+
+
+def test_audit_trail_no_hardcoded_key():
+    """Verify that AuditTrail generates a random key when none is provided."""
+    from agents.base import AuditTrail
+    trail1 = AuditTrail()
+    trail2 = AuditTrail()
+    # Two instances without explicit keys should have different keys
+    assert trail1.secret_key != trail2.secret_key
+
+    # Instance with explicit key should use it
+    trail3 = AuditTrail(secret_key="test-key-123")
+    assert trail3.secret_key == b"test-key-123"
