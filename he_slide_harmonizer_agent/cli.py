@@ -5,7 +5,7 @@ import argparse
 import csv
 import json
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from .models import ClinicalCasePayload
 from .agents import HarmonizationCoordinator
 
@@ -16,9 +16,21 @@ def _validate_safe_path(filepath: str) -> Path:
     """Validate that a file path is safe (no path traversal)."""
     p = Path(filepath).resolve()
     cwd = Path.cwd().resolve()
-    if not str(p).startswith(str(cwd)):
+    if PureWindowsPath(filepath).is_absolute() or not p.is_relative_to(cwd):
         raise ValueError(f"Path traversal blocked: '{filepath}' must be within the working directory.")
     return p
+
+
+def _parse_csv_bool(value):
+    """Parse CSV booleans explicitly; bool("False") is True in Python."""
+    if isinstance(value, bool):
+        return value
+    normalized = str(value or "").strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "off"}:
+        return False
+    raise ValueError(f"Invalid CSV boolean value: {value!r}")
 
 
 def main(argv=None):
@@ -85,7 +97,7 @@ def main(argv=None):
             fieldnames = list(reader.fieldnames or [])
             rows = list(reader)
 
-        out_fields = fieldnames + ["overall_status", "total_alerts", "stat_critical_alerts", "consensus_summary"]
+        out_fields = list(dict.fromkeys(fieldnames + ["overall_status", "total_alerts", "stat_critical_alerts", "consensus_summary"]))
         out_rows = []
         for r in rows:
             case = ClinicalCasePayload(
@@ -94,7 +106,7 @@ def main(argv=None):
                 primary_metric=float(r.get("metric_primary", r.get("primary_metric", 15.0))),
                 secondary_metric=float(r.get("metric_secondary", r.get("secondary_metric", 5.0))),
                 status_flag=r.get("status_flag", r.get("status_text", "NORMAL")),
-                is_stat=bool(r.get("is_stat", r.get("critical_flag", False))),
+                is_stat=_parse_csv_bool(r.get("is_stat", r.get("critical_flag", False))),
             )
             dossier = coordinator.process_case(case)
             row_dict = dict(r)
