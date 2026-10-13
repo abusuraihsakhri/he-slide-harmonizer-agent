@@ -14,7 +14,7 @@ import datetime
 import json
 import sys
 import uuid
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Dict, Any, List, Optional
 
 
@@ -90,7 +90,7 @@ class StainMatrixNormalizerAgent:
     """Specialized Sub-Agent 2 for he-slide-harmonizer-agent"""
     def evaluate(self, payload: Dict[str, Any]) -> List[AgentAlert]:
         alerts = []
-        is_critical = bool(payload.get("critical_flag", False))
+        is_critical = _parse_csv_bool(payload.get("critical_flag", False))
         val2 = float(payload.get("metric_secondary", 5.0))
         if is_critical or val2 > 12.0:
             alerts.append(
@@ -167,9 +167,9 @@ class HarmonizationCoordinator:
         if "summary" in q or "status" in q:
             return f"H&E Slide Harmonizer: Multi-Scanner Optical Stain Normalization & Color Deconvolution Agent currently tracking {len(self.case_registry)} cases in local air-gapped memory."
         elif "guidelines" in q or "protocol" in q:
-            return "All sub-agents operate under validated consensus clinical algorithms and CAP/CLSI/NCCN/WHO standards."
+            return "The sub-agents use demonstration threshold rules, not validated clinical standards."
         else:
-            return f"H&E Slide Harmonizer: Multi-Scanner Optical Stain Normalization & Color Deconvolution Agent executive agent online. Continuous supervisory monitoring active across all domain parameters."
+            return f"H&E Slide Harmonizer numeric-rule demonstration is available for local use; no clinical monitoring is performed."
 
 
 coordinator = HarmonizationCoordinator()
@@ -179,9 +179,21 @@ def _validate_safe_path(filepath: str) -> Path:
     """Validate that a file path is safe (no path traversal)."""
     p = Path(filepath).resolve()
     cwd = Path.cwd().resolve()
-    if not str(p).startswith(str(cwd)):
+    if PureWindowsPath(filepath).is_absolute() or not p.is_relative_to(cwd):
         raise ValueError(f"Path traversal blocked: '{filepath}' must be within the working directory.")
     return p
+
+
+def _parse_csv_bool(value):
+    """Parse CSV booleans explicitly; bool("False") is True in Python."""
+    if isinstance(value, bool):
+        return value
+    normalized = str(value or "").strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"", "0", "false", "no", "n", "off"}:
+        return False
+    raise ValueError(f"Invalid CSV boolean value: {value!r}")
 
 
 def create_app():
@@ -284,7 +296,7 @@ def main(argv=None):
             fieldnames = list(reader.fieldnames or [])
             rows = list(reader)
 
-        out_fields = fieldnames + ["overall_status", "total_alerts", "critical_count", "consensus_summary"]
+        out_fields = list(dict.fromkeys(fieldnames + ["overall_status", "total_alerts", "critical_count", "consensus_summary"]))
         out_rows = []
         for r in rows:
             dossier = coordinator.audit_case(dict(r))

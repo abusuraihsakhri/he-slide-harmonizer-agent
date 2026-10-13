@@ -1,5 +1,5 @@
 """
-Autonomous Bayesian Calibration & Active Learning Feedback Engine for he-slide-harmonizer-agent.
+Heuristic Worker Reliability Feedback Tracker for he-slide-harmonizer-agent.
 """
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
@@ -12,7 +12,7 @@ class WorkerPerformanceMetric(BaseModel):
     dynamic_weight: float = 1.0
 
 class ActiveLearningEngine:
-    """Continuously refines sub-agent voting weights based on consensus feedback."""
+    """Tracks simple concordance-weighted worker scores; no Bayesian fitting."""
 
     def __init__(self, system_name: str = "He Slide Harmonizer Agent"):
         self.system_name = system_name

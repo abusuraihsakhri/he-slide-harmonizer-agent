@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "He Slide Harmonizer Engine API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
+    "title": "H&E Slide Harmonizer Agent — Numeric Audit API",
+    "description": "Demonstration numeric-rule task audit. No image harmonization or validated clinical decision support.",
     "version": "3.0.0-ENTERPRISE",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
@@ -22,17 +22,17 @@
     },
     "/metrics": {
       "get": {
-        "summary": "Prometheus operational metrics",
+        "summary": "JSON counts for processed tasks and audit blocks",
         "responses": {
           "200": {
-            "description": "Prometheus text metrics"
+            "description": "JSON operational summary"
           }
         }
       }
     },
     "/api/audit": {
       "post": {
-        "summary": "Dispatch task payload across specialized workers",
+        "summary": "Evaluate numeric inputs using illustrative thresholds",
         "requestBody": {
           "content": {
             "application/json": {
@@ -69,14 +69,20 @@
         },
         "responses": {
           "200": {
-            "description": "Consensus dossier with HMAC signature"
+            "description": "Demonstration dossier and signed audit chain entry"
+          },
+          "400": {
+            "description": "Prohibited identifier detected"
+          },
+          "422": {
+            "description": "Invalid task schema or nonfinite numeric metric"
           }
         }
       }
     },
     "/api/chat": {
       "post": {
-        "summary": "Air-gapped supervisory conversational assistant",
+        "summary": "Deterministic local mock query (not an external language model)",
         "requestBody": {
           "content": {
             "application/json": {

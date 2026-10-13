@@ -14,7 +14,7 @@ def create_app():
 
         app = FastAPI(
             title="H&E Slide Harmonizer: Multi-Scanner Optical Stain Normalization & Color Deconvolution Agent",
-            description="Multi-agent color constancy agent normalizing slide stain variations across Aperio, Hamamatsu, and Philips scanners using Macenko/Vahadane vectors.",
+            description="Illustrative numeric-rule evaluator; not a stain-normalization or whole-slide image processor.",
             version="2.0.0-PRO",
         )
 

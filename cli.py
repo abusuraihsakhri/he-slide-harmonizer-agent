@@ -6,7 +6,7 @@ import csv
 import json
 import os
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor
 from agents.base import AuditLogger, SecurityException
@@ -18,9 +18,21 @@ def _validate_safe_path(filepath: str) -> Path:
     """Validate that a file path is safe (no path traversal)."""
     p = Path(filepath).resolve()
     cwd = Path.cwd().resolve()
-    if not str(p).startswith(str(cwd)):
+    if PureWindowsPath(filepath).is_absolute() or not p.is_relative_to(cwd):
         raise SecurityException(f"Path traversal blocked: '{filepath}' must be within the working directory.")
     return p
+
+
+def _parse_csv_bool(value):
+    """Parse CSV booleans explicitly; bool("False") is True in Python."""
+    if isinstance(value, bool):
+        return value
+    normalized = str(value or "").strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"", "0", "false", "no", "n", "off"}:
+        return False
+    raise ValueError(f"Invalid CSV boolean value: {value!r}")
 
 
 def main(argv=None):
@@ -98,16 +110,16 @@ def main(argv=None):
             fieldnames = list(reader.fieldnames or [])
             rows = list(reader)
 
-        out_fields = fieldnames + ["overall_urgency", "integrity_status", "total_alerts", "audit_hash"]
+        out_fields = list(dict.fromkeys(fieldnames + ["overall_urgency", "integrity_status", "total_alerts", "audit_hash"]))
         out_rows = []
         for r in rows:
             payload = SystemTaskPayload(
-                task_id=r.get("task_id", "TASK-01"),
-                target_identifier=r.get("target_identifier", "TARGET-01"),
-                primary_metric=float(r.get("primary_metric", 15.0)),
-                secondary_metric=float(r.get("secondary_metric", 5.0)),
-                status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=bool(r.get("is_critical_flag", False)),
+                task_id=r.get("task_id") or r.get("case_id") or "TASK-01",
+                target_identifier=r.get("target_identifier") or r.get("patient_synthetic_id") or "TARGET-01",
+                primary_metric=float(r.get("primary_metric") or r.get("metric_primary") or 15.0),
+                secondary_metric=float(r.get("secondary_metric") or r.get("metric_secondary") or 5.0),
+                status_descriptor=r.get("status_descriptor") or r.get("status_flag") or "NOMINAL",
+                is_critical_flag=_parse_csv_bool(r.get("is_critical_flag", r.get("is_stat", False))),
             )
             dossier = supervisor.process_task(payload)
             row_dict = dict(r)
