@@ -114,12 +114,12 @@ def main(argv=None):
         out_rows = []
         for r in rows:
             payload = SystemTaskPayload(
-                task_id=r.get("task_id", "TASK-01"),
-                target_identifier=r.get("target_identifier", "TARGET-01"),
-                primary_metric=float(r.get("primary_metric", 15.0)),
-                secondary_metric=float(r.get("secondary_metric", 5.0)),
-                status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=_parse_csv_bool(r.get("is_critical_flag", False)),
+                task_id=r.get("task_id") or r.get("case_id") or "TASK-01",
+                target_identifier=r.get("target_identifier") or r.get("patient_synthetic_id") or "TARGET-01",
+                primary_metric=float(r.get("primary_metric") or r.get("metric_primary") or 15.0),
+                secondary_metric=float(r.get("secondary_metric") or r.get("metric_secondary") or 5.0),
+                status_descriptor=r.get("status_descriptor") or r.get("status_flag") or "NOMINAL",
+                is_critical_flag=_parse_csv_bool(r.get("is_critical_flag", r.get("is_stat", False))),
             )
             dossier = supervisor.process_task(payload)
             row_dict = dict(r)
