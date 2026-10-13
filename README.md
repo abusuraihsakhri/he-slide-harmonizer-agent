@@ -34,7 +34,7 @@ he-slide-harmonizer-agent serve --host 127.0.0.1 --port 8000
 
 The CLI uses `cli.py` and the FastAPI application at `agents.api:app`. Its main routes are `/health`, `/api/audit`, `/api/chat`, `/metrics` (JSON), and `/api/audit/logs`. The older `he-slide-harmonizer-engine` command is also retained for compatibility with `he_slide_harmonizer_agent.cli`; the two CLIs have different payload schemas.
 
-The CLI batch command reads a CSV with fields such as `task_id`, `target_identifier`, `primary_metric`, `secondary_metric`, `status_descriptor`, and `is_critical_flag` (explicit true/false values). Input and output paths must remain inside the current working directory.
+The CLI batch command reads a CSV with fields such as `task_id`, `target_identifier`, `primary_metric`, `secondary_metric`, `status_descriptor`, and `is_critical_flag` (explicit true/false values). The bundled `sample.csv` also works: `case_id`, `patient_synthetic_id`, `metric_primary`, `metric_secondary`, `status_flag`, and `is_stat` are recognized as aliases. Input and output paths must remain inside the current working directory.
 
 For container use:
 
