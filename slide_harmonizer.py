@@ -191,7 +191,7 @@ def _parse_csv_bool(value):
     normalized = str(value or "").strip().lower()
     if normalized in {"1", "true", "yes", "y", "on"}:
         return True
-    if normalized in {"0", "false", "no", "n", "off"}:
+    if normalized in {"", "0", "false", "no", "n", "off"}:
         return False
     raise ValueError(f"Invalid CSV boolean value: {value!r}")
 
