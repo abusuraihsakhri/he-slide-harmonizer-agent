@@ -58,9 +58,9 @@ def test_batch_reads_bundled_sample_style(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     sample = tmp_path / "sample.csv"
     sample.write_text(
-        "case_id,patient_synthetic_id,metric_primary,metric_secondary,is_stat,status_flag\\n"
-        "ONE,SYNTH-01,35,14,False,NORMAL\\n"
-        "TWO,SYNTH-02,12,4,True,NORMAL\\n",
+        "case_id,patient_synthetic_id,metric_primary,metric_secondary,is_stat,status_flag\n"
+        "ONE,SYNTH-01,35,14,False,NORMAL\n"
+        "TWO,SYNTH-02,12,4,True,NORMAL\n",
         encoding="utf-8",
     )
     assert main(["batch", "-i", "sample.csv", "-o", "out.csv"]) == 0
