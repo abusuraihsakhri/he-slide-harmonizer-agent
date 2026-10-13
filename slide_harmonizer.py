@@ -167,9 +167,9 @@ class HarmonizationCoordinator:
         if "summary" in q or "status" in q:
             return f"H&E Slide Harmonizer: Multi-Scanner Optical Stain Normalization & Color Deconvolution Agent currently tracking {len(self.case_registry)} cases in local air-gapped memory."
         elif "guidelines" in q or "protocol" in q:
-            return "All sub-agents operate under validated consensus clinical algorithms and CAP/CLSI/NCCN/WHO standards."
+            return "The sub-agents use demonstration threshold rules, not validated clinical standards."
         else:
-            return f"H&E Slide Harmonizer: Multi-Scanner Optical Stain Normalization & Color Deconvolution Agent executive agent online. Continuous supervisory monitoring active across all domain parameters."
+            return f"H&E Slide Harmonizer numeric-rule demonstration is available for local use; no clinical monitoring is performed."
 
 
 coordinator = HarmonizationCoordinator()

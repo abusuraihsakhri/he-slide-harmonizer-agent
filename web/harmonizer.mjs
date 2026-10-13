@@ -59,6 +59,7 @@ export function normalizeImageData(source, reference, strength = 1) {
   }
   const src = analyze(source), ref = analyze(reference);
   const out = new Uint8ClampedArray(source);
+  if (strength === 0) return { pixels: out, source: src, reference: ref, output: src };
   const scales = src.std.map((s, i) =>
     Math.max(0.25, Math.min(4, ref.std[i] / Math.max(s, 1e-6))));
   for (let i = 0; i < source.length; i += 4) {

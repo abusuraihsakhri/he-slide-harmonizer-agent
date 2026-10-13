@@ -93,7 +93,7 @@ class HarmonizationCoordinator:
             "stat_critical_alerts": stat_count,
             "warning_alerts": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "guideline_standard": "CAP Cancer Protocols & ASCO/CAP 2023",
+            "guideline_standard": "Illustrative numeric rules",
             "consensus_summary": f"Multi-agent supervision completed across 3 sub-agents with status [{status.value}].",
         }
 
@@ -105,6 +105,6 @@ class HarmonizationCoordinator:
         if "status" in q or "summary" in q:
             return f"H&E Slide Harmonizer: Multi-Scanner Optical Stain Normalization & Color Deconvolution Agent currently tracking {len(self.case_registry)} cases in on-premises memory."
         elif "guideline" in q or "standard" in q:
-            return "Active clinical surveillance operates under CAP Cancer Protocols & ASCO/CAP 2023 validated protocols."
+            return "This demo implements illustrative thresholds, not validated diagnostic guidelines or standards."
         else:
             return f"H&E Slide Harmonizer: Multi-Scanner Optical Stain Normalization & Color Deconvolution Agent executive agent online. Zero-PHI air-gapped monitoring active."
